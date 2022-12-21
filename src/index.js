@@ -1,18 +1,24 @@
 import express from "express";
-import cookieParser from "cookie-parser";
-import session from "express-session";
 import mainRouter from "./routes/user.routes.js";
+import session from "express-session";
+import passport from "passport";
+import { loginFunc, signUpFunc } from "./services/auth.js";
 import MongoStore from "connect-mongo";
-import config from "./config/index.js";
+import Config from "./config/index.js";
+import { initDb } from "./db/db.js";
 
-const ttlSeconds = 180;
+const app = express();
+
+app.use(express.json());
+
+await initDb();
+console.log("Conectado a la DB!");
+
+const ttlSeconds = 600;
 
 const StoreOptions = {
   store: MongoStore.create({
-    mongoUrl: config.MONGO_ATLAS_URL,
-    crypto: {
-      secret: "1234",
-    },
+    mongoUrl: Config.MONGO_ATLAS_URL,
   }),
   secret: "secretString",
   resave: true,
@@ -22,17 +28,17 @@ const StoreOptions = {
   },
 };
 
-const app = express();
-app.use(express.json());
-app.use(express.static("public"));
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 app.use(session(StoreOptions));
-app.set("view engine", "ejs");
 
-app.use("/", mainRouter);
+app.use(passport.initialize());
 
-const PORT = 8080;
-app.listen(PORT, () => {
-  console.log(`Servidor express escuchando en el puerto ${PORT}`);
-});
+app.use(passport.session());
+
+passport.use("login", loginFunc);
+passport.use("signup", signUpFunc);
+
+app.use("/api", mainRouter);
+
+app.listen(Config.PUERTO, () =>
+  console.log(`Escuchando en el puerto ${Config.PUERTO}`)
+);

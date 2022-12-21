@@ -1,19 +1,25 @@
+import passport from "passport";
 import { Router } from "express";
-const router = Router();
 import {
-  logout,
-  infoSession,
-  loginPost,
-  loginGet,
+  signUp,
+  login,
+  getHome,
+  logOut,
 } from "../controllers/user.controllers.js";
-import { validateLogIn } from "../middlewares/middlewares.js";
+import { isLoggedIn } from "../middlewares/user.middlewares.js";
 
-router.post("/login", loginPost);
+const router = Router();
 
-router.get("/", loginGet);
+const passportOptions = {
+  badRequestMessage: "Problema con username / password!",
+};
 
-router.get("/home", validateLogIn, infoSession);
+router.post("/signup", signUp);
 
-router.get("/logout", logout);
+router.post("/login", passport.authenticate("login", passportOptions), login);
+
+router.get("/home", isLoggedIn, getHome);
+
+router.get("/logout", isLoggedIn, logOut);
 
 export default router;
