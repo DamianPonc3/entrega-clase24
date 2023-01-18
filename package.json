@@ -5,21 +5,29 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node ./src/serverjs",
-    "prod": "pm2 start ecosystem.config.js",
-    "stop:all": "pm2 stop all",
-    "delete:all": "pm2 detele all",
-    "dev": "nodemon ./src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./src/profilling/index.js",
+    "start:fork": "node ./src/profilling/index.js --puerto=8081",
+    "start:cluster": "node ./src/profilling/index.js --puerto=8082 --cluster",
+    "start:profilling": "node --prof src/profilling/index.js",
+    "start:profillingProcess": "node --prof-process isolate.log > isolate.txt",
+    "start:inspect": "node --inspect ./src/profilling/index.js",
+    "dev": "nodemon ./src/profilling/index.js",
+    "artillery:fork": "artillery quick --count 50 -n 20 http://localhost:8081/info > result_profilling.txt",
+    "artillery:cluster": "artillery quick --count 50 -n 20 http://localhost:8082/info",
+    "autocannon": "autocannon -c 100 -d 20 'http://localhost:8080/info'",
+    "start:0x": "0x ./src/profilling/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^16.0.3",
+    "artillery": "^2.0.0-28",
+    "autocannon": "^7.10.0",
+    "compression": "^1.7.4",
     "express": "^4.18.2",
+    "log4js": "^6.7.1",
     "minimist": "^1.2.7",
-    "nodemon": "^2.0.20",
-    "pm2": "^5.2.2"
+    "nodemon": "^2.0.20"
   }
 }
